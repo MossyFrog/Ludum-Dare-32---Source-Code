@@ -1,0 +1,202 @@
+stop();
+
+import flash.geom.Point;
+
+var leftPressed:Boolean = false;
+var rightPressed:Boolean = false;
+var upPressed:Boolean = false;
+var downPressed:Boolean = false;
+var xSpeed:Number = 0;
+var ySpeed:Number = 0;
+var scrollX:Number = 0;
+var scrollY:Number = 761;
+
+var speedConstant:int = 5;
+var frictionConstant:Number = 0.8;
+
+var leftBumping:Boolean = false;
+var rightBumping:Boolean = false;
+var upBumping:Boolean = false;
+var downBumping:Boolean = false;
+var leftBumpPoint:Point = new Point(-30, -60);
+var rightBumpPoint:Point = new Point(30, -60);
+var upBumpPoint:Point = new Point(0, -183);
+var downBumpPoint:Point = new Point(0, 0);
+
+var gravityConstant:Number = 3.5;
+var jumpConstant:Number = -70;
+
+var animationState:String = "idle";
+
+stage.addEventListener(Event.ENTER_FRAME, loop);
+
+stage.addEventListener(KeyboardEvent.KEY_DOWN, keyDownHandler);
+stage.addEventListener(KeyboardEvent.KEY_UP, keyUpHandler);
+
+function loop(e:Event):void
+{
+	if(back.collisions.hitTestPoint(player.x + leftBumpPoint.x, player.y + leftBumpPoint.y, true))
+	{
+		trace("leftBumping");
+		leftBumping = true;
+	} else
+	{
+		leftBumping = false;
+	}
+	
+	if(back.collisions.hitTestPoint(player.x + rightBumpPoint.x, player.y + rightBumpPoint.y, true))
+	{
+		trace("rightBumping");
+		rightBumping = true;
+	} else
+	{
+		rightBumping = false;
+	}
+	
+	if(back.collisions.hitTestPoint(player.x + upBumpPoint.x, player.y + upBumpPoint.y, true))
+	{
+		trace("upBumping");
+		upBumping = true;
+	} else
+	{
+		upBumping = false;
+	}
+	
+	if(back.collisions.hitTestPoint(player.x + downBumpPoint.x, player.y + downBumpPoint.y, true))
+	{
+		trace("downBumping");
+		downBumping = true;
+	} else
+	{
+		downBumping = false;
+	}
+	
+	if(leftPressed)
+	{
+		xSpeed -= speedConstant;
+		player.scaleX = -0.8
+	} else if(rightPressed)
+	{
+		xSpeed += speedConstant;
+		player.scaleX = 0.8;
+	}
+	
+	
+	
+	if(leftBumping)
+	{
+		if(xSpeed < 0)
+		{
+			xSpeed *= -0.5;
+		}
+	}
+	
+	if(rightBumping)
+	{
+		if(xSpeed > 0)
+		{
+			xSpeed *= -0.5;
+		}
+	}
+	
+	if(upBumping)
+	{
+		if(ySpeed < 0)
+		{
+			ySpeed *= -0.5;
+		}
+	}
+	
+	if(downBumping)
+	{
+		if(ySpeed > 0)
+		{
+			ySpeed *= -0;
+		}
+		
+		if(upPressed)
+		{
+			ySpeed = jumpConstant;
+		}
+	} else
+	{
+		ySpeed += gravityConstant;
+	}
+	
+	xSpeed *= frictionConstant;
+	ySpeed *= frictionConstant;
+	
+	scrollX -= xSpeed;
+	scrollY -= ySpeed;
+
+	back.x = scrollX;
+	back.y = scrollY;
+	
+	sky.x = scrollX * 0.1;
+	sky.y = scrollY * 0.1;
+	
+	smoke.x = scrollX * 0.05
+	smoke.y = scrollY * 0.05
+
+	
+	if(Math.abs(xSpeed) < 0.5)
+	{
+		xSpeed = 0;
+	}
+	
+	if(player.currentLabel != animationState)
+		{
+			player.gotoAndStop(animationState);
+		}
+		
+	if( (leftPressed || rightPressed || xSpeed > speedConstant || xSpeed < speedConstant *-1) && downBumping)
+	{
+		animationState = "running";
+	} else if(downBumping)
+	{
+		animationState = "idle";
+	} else
+	{
+		animationState = "jumping";
+	}
+	
+	if( back.x < -15018)
+	{
+		gotoAndStop(2);
+	}
+
+}
+
+function keyDownHandler(e:KeyboardEvent):void
+{
+	if(e.keyCode == Keyboard.LEFT)
+	{
+		leftPressed = true;
+	} else if(e.keyCode == Keyboard.RIGHT)
+	{
+		rightPressed = true;
+	} else if(e.keyCode == Keyboard.UP)
+	{
+		upPressed = true;
+	} else if(e.keyCode == Keyboard.DOWN)
+	{
+		downPressed = true;
+	}
+}
+
+function keyUpHandler(e:KeyboardEvent):void
+{
+	if(e.keyCode == Keyboard.LEFT)
+	{
+		leftPressed = false;
+	} else if(e.keyCode == Keyboard.RIGHT)
+	{
+		rightPressed = false;
+	} else if(e.keyCode == Keyboard.UP)
+	{
+		upPressed = false;
+	} else if(e.keyCode == Keyboard.DOWN)
+	{
+		downPressed = false;
+	}
+}
